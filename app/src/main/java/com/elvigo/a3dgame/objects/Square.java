@@ -28,7 +28,8 @@ public class Square {
 
     private final int mProgram;
 
-    private float[] color = {0.63671875f, 0.76953125f, 0.22265625f, 1.0f};
+//    private float[] color = {0.63671875f, 0.76953125f, 0.22265625f, 1.0f};
+private float[] color = {0f, 0f, 0f, 1.0f};
 
     // Ends here
 

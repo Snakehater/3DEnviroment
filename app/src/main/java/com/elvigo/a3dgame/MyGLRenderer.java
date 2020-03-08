@@ -6,6 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 
 import com.elvigo.a3dgame.objects.Square;
 import com.elvigo.a3dgame.objects.Triangle;
@@ -17,7 +18,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         // Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // initialize a triangle
         mTriangle = new Triangle();
@@ -25,7 +26,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mSquare = new Square();
     }
 
-    public void onDrawFrame(GL10 unused) {
+    private float[] rotationMatrix = new float[16];
+    @Override
+    public void onDrawFrame(GL10 gl) {
+        float[] scratch = new float[16];
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 //        mSquare.draw();
@@ -38,7 +42,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 
         // Draw shape
-        mTriangle.draw(vPMatrix);
+        // Rotating stuff
+
+        // Create a rotation transformation for the triangle
+        long time = SystemClock.uptimeMillis() % 4000L;
+        float angle = 0.090f * ((int) time);
+        Matrix.setRotateM(rotationMatrix, 0, angle, 0, 0.0f, -1.0f);
+
+        // Combine the rotation matrix with the projection and camera view
+        // Note that the vPMatrix factor *must be first* in order
+        // for the matrix multiplication product to be correct.
+        Matrix.multiplyMM(scratch, 0, vPMatrix, 0, rotationMatrix, 0);
+
+        // Draw triangle
+        mSquare.draw(scratch);
+
+        // Ends here
     }
 
     // vPMatrix is an abbreviation for "Model View Projection Matrix"

@@ -13,11 +13,11 @@ public class Square {
 
     // Drawing stuff
 
-    private final String vertexShaderCode =
-            "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    "  gl_Position = vPosition;" +
-                    "}";
+//    private final String vertexShaderCode =
+//            "attribute vec4 vPosition;" +
+//                    "void main() {" +
+//                    "  gl_Position = vPosition;" +
+//                    "}";
 
     private final String fragmentShaderCode =
             "precision mediump float;" +
@@ -32,16 +32,33 @@ public class Square {
 
     // Ends here
 
+    // Matrix stuff
+    private final String vertexShaderCode =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "}";
+
+    // Use to access and set the view transformation
+    private int vPMatrixHandle;
+    // Ends here
+
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float squareCoords[] = {
-            -0.5f,  0.5f, 0.0f,   // top left
-            -0.5f, -0.5f, 0.0f,   // bottom left
-             0.5f, -0.5f, 0.0f,   // bottom right
-             0.5f,  0.5f, 0.0f }; // top right
+            -0.25f,  0.25f, 0.0f,   // top left
+            -0.25f, -0.25f, 0.0f,   // bottom left
+             0.25f, -0.25f, 0.0f,   // bottom right
+             0.25f,  0.25f, 0.0f }; // top right
 
     private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
@@ -91,7 +108,7 @@ public class Square {
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public void draw() {
+    public void draw(float[] mvpMatrix) { // pass in the calculated transformation matrix
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
@@ -121,6 +138,20 @@ public class Square {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle);
+
+        // Matrix stuff
+        // get handle to shape's transformation matrix
+        vPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        // Pass the projection and view transformation to the shader
+        GLES20.glUniformMatrix4fv(vPMatrixHandle, 1, false, mvpMatrix, 0);
+
+        // Draw the triangle
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+
+        // Disable vertex array
+        GLES20.glDisableVertexAttribArray(positionHandle);
+        // That ends here
     }
     // That ends here
 }

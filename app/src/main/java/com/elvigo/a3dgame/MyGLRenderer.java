@@ -7,6 +7,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.view.MotionEvent;
 
 import com.elvigo.a3dgame.objects.Square;
 import com.elvigo.a3dgame.objects.Triangle;
@@ -29,7 +30,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private float[] rotationMatrix = new float[16];
     @Override
     public void onDrawFrame(GL10 gl) {
-        float[] scratch = new float[16];
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 //        mSquare.draw();
@@ -44,10 +44,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw shape
         // Rotating stuff
 
-        // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis() % 4000L;
-        float angle = 0.090f * ((int) time);
-        Matrix.setRotateM(rotationMatrix, 0, angle, 0, 0.0f, -1.0f);
+        float[] scratch = new float[16];
+
+        // Create a rotation for the triangle
+        // long time = SystemClock.uptimeMillis() % 4000L;
+        // float angle = 0.090f * ((int) time);
+        Matrix.setRotateM(rotationMatrix, 0, mAngle, 0, 0, -1.0f);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the vPMatrix factor *must be first* in order
@@ -89,4 +91,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         return shader;
     }
+
+    // Rotating functions
+
+    public volatile float mAngle;
+
+    public float getAngle() {
+        return mAngle;
+    }
+
+    public void setAngle(float angle) {
+        mAngle = angle;
+    }
+    // Ends here
 }
